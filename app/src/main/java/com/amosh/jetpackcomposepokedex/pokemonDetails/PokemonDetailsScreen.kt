@@ -291,7 +291,7 @@ fun PokemonTypeSection(
 fun PokemonDetailDataSection(
     pokemonWeight: Int,
     pokemonHeight: Int,
-    sectionHeight: Dp = 80.dp,
+    sectionHeight: Dp = 60.dp,
 ) {
     val pokemonWeightInKg = remember {
         (pokemonWeight * 100f).roundToInt() / 1000f
