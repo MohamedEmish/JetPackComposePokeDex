@@ -5,7 +5,6 @@ import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.capitalize
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.palette.graphics.Palette
@@ -14,6 +13,7 @@ import com.amosh.jetpackcomposepokedex.repository.PokemonRepository
 import com.amosh.jetpackcomposepokedex.util.Constants
 import com.amosh.jetpackcomposepokedex.util.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.*
 import javax.inject.Inject
@@ -30,8 +30,36 @@ class PokemonListViewModel @Inject constructor(
     var isLoading = mutableStateOf(false)
     var endReached = mutableStateOf(false)
 
+    private var cachedPokemonList = listOf<PokeDexListEntry>()
+    private var isSearchingStarting = true
+    var isSearching = mutableStateOf(false)
+
     init {
         loadPokemonPaginated()
+    }
+
+    fun searchPokemonList(query: String) {
+        val listToSearch = when {
+            isSearchingStarting -> pokemonList.value
+            else -> cachedPokemonList
+        }
+
+        viewModelScope.launch(Dispatchers.Default) {
+            if (query.isEmpty()) {
+                pokemonList.value = cachedPokemonList
+                isSearching.value = false
+                isSearchingStarting = true
+                return@launch
+            } else {
+                val results = listToSearch.filter { it.pokemonName.contains(query.trim(), true) || it.number.toString() == query.trim() }
+                if (isSearchingStarting) {
+                    cachedPokemonList = pokemonList.value
+                    isSearchingStarting = false
+                }
+                pokemonList.value = results
+                isSearching.value = true
+            }
+        }
     }
 
     fun loadPokemonPaginated() {
@@ -63,13 +91,11 @@ class PokemonListViewModel @Inject constructor(
                             number = number.toInt()
                         )
                     }
-                    currentPage ++
+                    currentPage++
                     loadError.value = ""
                     isLoading.value = false
 
-                    val oldList = pokemonList.value.toMutableList()
-                    oldList.addAll(pokeDexListEntry)
-                    pokemonList.value = oldList
+                    pokemonList.value += pokeDexListEntry
                 }
             }
         }

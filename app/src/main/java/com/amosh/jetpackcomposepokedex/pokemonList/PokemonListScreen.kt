@@ -3,7 +3,6 @@ package com.amosh.jetpackcomposepokedex.pokemonList
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -30,7 +29,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
@@ -48,6 +46,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
@@ -56,10 +55,12 @@ import com.amosh.jetpackcomposepokedex.models.PokeDexListEntry
 import com.amosh.jetpackcomposepokedex.ui.theme.Navigation
 import com.amosh.jetpackcomposepokedex.ui.theme.RobotoCondensed
 import com.amosh.jetpackcomposepokedex.ui.theme.spacing
+import dagger.hilt.android.lifecycle.HiltViewModel
 
 @Composable
 fun PokemonListScreen(
     navController: NavController,
+    viewModel: PokemonListViewModel = hiltViewModel(),
 ) {
     Surface(
         color = MaterialTheme.colors.background,
@@ -80,9 +81,12 @@ fun PokemonListScreen(
                 hint = "Search...",
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(MaterialTheme.spacing.medium
+                    .padding(
+                        MaterialTheme.spacing.medium
                     )
-            )
+            ) {
+               viewModel.searchPokemonList(it)
+            }
             Spacer(modifier = Modifier.height(MaterialTheme.spacing.medium))
             PokemonList(navController = navController)
         }
@@ -154,6 +158,10 @@ fun PokemonList(
         viewModel.isLoading
     }
 
+    val isSearching by remember {
+        viewModel.isSearching
+    }
+
     LazyColumn(contentPadding = PaddingValues(MaterialTheme.spacing.medium)) {
         val itemCount = when {
             pokemonList.size % 2 == 0 -> pokemonList.size / 2
@@ -161,7 +169,7 @@ fun PokemonList(
         }
 
         items(itemCount) {
-            if (it >= itemCount - 1 && !endReached) {
+            if (it >= itemCount - 1 && !endReached && !isLoading && !isSearching) {
                 viewModel.loadPokemonPaginated()
             }
             PokeDexRow(rowIndex = it, entries = pokemonList, navController = navController)
