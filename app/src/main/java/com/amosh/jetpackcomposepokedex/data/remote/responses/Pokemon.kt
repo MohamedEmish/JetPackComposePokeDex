@@ -7,7 +7,7 @@ data class Pokemon(
     val abilities: List<Ability>,
     @SerializedName("base_experience")
     val baseExperience: Int,
-    val forms: List<Normalizer.Form>,
+    val forms: List<DefaultDataObject>,
     @SerializedName("game_indices")
     val gameIndices: List<GameIndex>,
     val height: Int,

@@ -97,6 +97,7 @@ class PokemonListViewModel @Inject constructor(
 
                     pokemonList.value += pokeDexListEntry
                 }
+                is Resource.Loading -> isLoading.value = true
             }
         }
     }

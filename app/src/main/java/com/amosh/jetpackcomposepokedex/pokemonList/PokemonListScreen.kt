@@ -85,7 +85,7 @@ fun PokemonListScreen(
                         MaterialTheme.spacing.medium
                     )
             ) {
-               viewModel.searchPokemonList(it)
+                viewModel.searchPokemonList(it)
             }
             Spacer(modifier = Modifier.height(MaterialTheme.spacing.medium))
             PokemonList(navController = navController)
@@ -294,6 +294,7 @@ fun PokeDexRow(
 @Composable
 fun RetrySection(
     error: String,
+    hasRetryButton: Boolean = true,
     onRetry: () -> Unit,
 ) {
     Column {
@@ -305,14 +306,16 @@ fun RetrySection(
             textAlign = TextAlign.Center,
         )
         Spacer(modifier = Modifier.height(MaterialTheme.spacing.small))
-        Button(
-            onClick = { onRetry() },
-            modifier = Modifier.align(CenterHorizontally)
-        ) {
-            Text(
-                text = "Retry",
-                modifier = Modifier.padding(MaterialTheme.spacing.extraSmall)
-            )
+        if (hasRetryButton) {
+            Button(
+                onClick = { onRetry() },
+                modifier = Modifier.align(CenterHorizontally)
+            ) {
+                Text(
+                    text = "Retry",
+                    modifier = Modifier.padding(MaterialTheme.spacing.extraSmall)
+                )
+            }
         }
     }
 }
